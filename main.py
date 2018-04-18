@@ -5,21 +5,32 @@ import ujson
 import utime
 import gc
 
+from wifilib import connect_wifi
+
 g_track_id = None
 g_track_img = None
 g_spotify_token = None
 g_showing_spotify_logo = False
 
-# read config from private.json
-with open('private.json', 'r') as f:
-    private_json = ujson.load(f)
-    SPOTIFY_CLIENT_ID = private_json['SPOTIFY_CLIENT_ID']
-    SPOTIFY_CLIENT_SECRET = private_json['SPOTIFY_CLIENT_SECRET']
-    BASE64_SPOTIFY_CLIENT_ID_SECRET = private_json['BASE64_SPOTIFY_CLIENT_ID_SECRET']
-    REDIRECT_URI = private_json['REDIRECT_URI']
-    SPOTIFY_ACESS_TOKEN = private_json['SPOTIFY_ACESS_TOKEN']
-    SPOTIFY_REFRESH_TOKEN = private_json['SPOTIFY_REFRESH_TOKEN']
-    WIFI_CONFIG = private['WIFI_CONFIG']
+
+def read_json(filename):
+    'read json from specified filename'
+    try:
+        lcd.println('reading {}'.format(filename))
+        with open(filename, 'r') as f:
+            return ujson.load(f)
+    except:
+        lcd.println('Error in reading json: ' + str(e))
+
+
+private_json = read_json('private.json')
+SPOTIFY_CLIENT_ID = private_json['SPOTIFY_CLIENT_ID']
+SPOTIFY_CLIENT_SECRET = private_json['SPOTIFY_CLIENT_SECRET']
+BASE64_SPOTIFY_CLIENT_ID_SECRET = private_json['BASE64_SPOTIFY_CLIENT_ID_SECRET']
+REDIRECT_URI = private_json['REDIRECT_URI']
+SPOTIFY_ACESS_TOKEN = private_json['SPOTIFY_ACESS_TOKEN']
+SPOTIFY_REFRESH_TOKEN = private_json['SPOTIFY_REFRESH_TOKEN']
+WIFI_CONFIG = private_json['WIFI_CONFIG']
 
 SPOTIFY_API_CURRENTLY_PLAYING_URL = 'https://api.spotify.com/v1/me/player/currently-playing'
 SPOTIFY_API_REFRESH_URL = 'https://accounts.spotify.com/api/token'
@@ -70,7 +81,7 @@ def get_current_playing_track():
             # if status code is 204, no track is played. It's not error
             if r.status_code == 204:
                 return None
-            else: # warn about status_code
+            else:               # warn about status_code
                 lcd.println('header status is: {}'.format(r.status_code))
                 return None
         return r.json()
@@ -178,6 +189,14 @@ def task(expires_date):
 
 
 def main():
+    try:
+        lcd.println('main')
+        if not connect_wifi(WIFI_CONFIG):
+            lcd.println('Failed to connect')
+            return
+    except Exception as e:
+        lcd.println(str(e))
+        return
     expires_date = 0
     lcd.clear()
     lcd.setCursor(0, 0)
@@ -190,7 +209,8 @@ def main():
             lcd.println('Exception(main): ' + str(e))
             import sys
             sys.print_exception(e)
-            expires_date = 0 # Force to refresh key
-
+            expires_date = 0    # Force to refresh key
+            # anyway, retry connect
+            connect_wifi(WIFI_CONFIG)
 
 main()
