@@ -104,6 +104,23 @@ def get_image_url(track):
     return None
 
 
+def download_image_to_file(image_url, filename, step_size=1024):
+    r = urequests.get(image_url)
+    try:
+        with open(filename, 'wb') as f:
+            while True:
+                c = r.raw.read(step_size)
+                if c:
+                    f.write(c)
+                else:
+                    return
+    except Exception as e:
+        lcd.println('Exception(download_image): ' + str(e))
+        raise e
+    finally:
+        r.close()
+
+
 def download_image(image_url):
     try:
         r = urequests.get(image_url)
@@ -168,7 +185,7 @@ def task(expires_date):
                 lcd.setCursor(0, 0)
                 lcd.setColor(lcd.WHITE)
                 if image_url and image_url != g_track_img:
-                    download_image(image_url)
+                    download_image_to_file(image_url, 'tmp.jpg')
                     show_image('tmp.jpg')
                 print_title(track_item)
                 print_artist(track_item)
@@ -212,5 +229,6 @@ def main():
             expires_date = 0    # Force to refresh key
             # anyway, retry connect
             connect_wifi(WIFI_CONFIG)
+
 
 main()
