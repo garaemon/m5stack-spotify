@@ -26,7 +26,8 @@ def read_json(filename):
 private_json = read_json('private.json')
 SPOTIFY_CLIENT_ID = private_json['SPOTIFY_CLIENT_ID']
 SPOTIFY_CLIENT_SECRET = private_json['SPOTIFY_CLIENT_SECRET']
-BASE64_SPOTIFY_CLIENT_ID_SECRET = private_json['BASE64_SPOTIFY_CLIENT_ID_SECRET']
+BASE64_SPOTIFY_CLIENT_ID_SECRET = private_json[
+    'BASE64_SPOTIFY_CLIENT_ID_SECRET']
 REDIRECT_URI = private_json['REDIRECT_URI']
 SPOTIFY_ACESS_TOKEN = private_json['SPOTIFY_ACESS_TOKEN']
 SPOTIFY_REFRESH_TOKEN = private_json['SPOTIFY_REFRESH_TOKEN']
@@ -52,11 +53,10 @@ def refresh_token_if_necessary():
             'grant_type': 'refresh_token',
             'refresh_token': SPOTIFY_REFRESH_TOKEN,
         }
-        data_str = '&'.join(['{}={}'.format(key, value)
-                             for key, value in form.items()])
-        r = urequests.post(SPOTIFY_API_REFRESH_URL,
-                           data=data_str,
-                           headers=headers)
+        data_str = '&'.join(
+            ['{}={}'.format(key, value) for key, value in form.items()])
+        r = urequests.post(
+            SPOTIFY_API_REFRESH_URL, data=data_str, headers=headers)
         result = r.json()
         g_spotify_token = result['access_token']
         return int(result['expires_in'])
@@ -67,12 +67,9 @@ def refresh_token_if_necessary():
 def get_current_playing_track():
     global g_spotify_token
     headers = {
-        'Accept':
-        'application/json',
-        'Content-Type':
-        'application/json',
-        'Authorization':
-        'Bearer {}'.format(g_spotify_token),
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {}'.format(g_spotify_token),
     }
     try:
         r = urequests.get(SPOTIFY_API_CURRENTLY_PLAYING_URL, headers=headers)
@@ -81,7 +78,7 @@ def get_current_playing_track():
             # if status code is 204, no track is played. It's not error
             if r.status_code == 204:
                 return None
-            else:               # warn about status_code
+            else:  # warn about status_code
                 lcd.println('header status is: {}'.format(r.status_code))
                 return None
         return r.json()
@@ -225,7 +222,7 @@ def main():
             lcd.println('Exception(main): ' + str(e))
             import sys
             sys.print_exception(e)
-            expires_date = 0    # Force to refresh key
+            expires_date = 0  # Force to refresh key
             # anyway, retry connect
             connect_wifi(WIFI_CONFIG)
 

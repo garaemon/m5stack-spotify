@@ -6,7 +6,7 @@ import network
 def connect_wifi(wifi_configs, timeout_sec=10):
     'Connect to wifi described in wifi_configs'
     wlan = network.WLAN(network.STA_IF)  # create station interface
-    wlan.active(True)                    # activate the interface
+    wlan.active(True)  # activate the interface
     for net in wlan.scan():
         ssid = net[0].decode()
         for candidate_config in wifi_configs:
