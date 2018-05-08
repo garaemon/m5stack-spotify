@@ -173,7 +173,6 @@ def task(expires_date):
     try:
         now = utime.time()
         if now > expires_date:
-            lcd.println('refresh token')
             next_expire_delta = refresh_token_if_necessary()
             expires_date = now + next_expire_delta
         track = get_current_playing_track()
